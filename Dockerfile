@@ -1,11 +1,16 @@
-FROM ubuntu:14.04.2
+FROM centos:7
+MAINTAINER Marco Palladino, marco@mashape.com
 
-MAINTAINER support@shiyanlou.com
+ENV KONG_VERSION 0.10.3
 
-RUN useradd -m trylab
+RUN yum install -y wget https://github.com/Mashape/kong/releases/download/$KONG_VERSION/kong-$KONG_VERSION.el7.noarch.rpm && \
+    yum clean all
 
-USER trylab
+RUN wget -O /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.1.3/dumb-init_1.1.3_amd64 && \
+    chmod +x /usr/local/bin/dumb-init
 
-WORKDIR /home/trylab
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]
 
-CMD echo "shiyanlou trylab." | wc -
+EXPOSE 8000 8443 8001 7946
+CMD ["kong", "start"]
